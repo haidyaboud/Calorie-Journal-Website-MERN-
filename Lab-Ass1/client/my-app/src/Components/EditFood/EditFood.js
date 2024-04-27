@@ -1,92 +1,98 @@
-import React,{useState,useEffect,useRef} from "react";
+//components/EditFood
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useParams } from "react-router-dom"; // Import useParams
 
-
-const EditFood = (props) => {
-
-  const [username,setUsername] = useState("");
-  const [description,setDescription] = useState("");
-  const [calories,setCalories] = useState("");
-  const [date,setDate] = useState(new Date());
-  const [users,setUsers] = useState([]);
+const EditFood = () => {
+  const { id } = useParams(); // Use useParams to get the 'id' param from the URL
+  const [username, setUsername] = useState("");
+  const [description, setDescription] = useState("");
+  const [calories, setCalories] = useState("");
+  const [date, setDate] = useState(new Date());
+  const [users, setUsers] = useState([]);
   const userInputRef = useRef("userInput");
 
   useEffect(() => {
+    // Fetch the specific food entry by ID to edit
+    axios.get("http://localhost:5000/calorie/" + id)
+      .then((response) => {
+        setUsername(response.data.username);
+        setDescription(response.data.description);
+        setCalories(response.data.calories);
+        setDate(new Date(response.data.date));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
-    axios
-    .get("http://localhost:5000/calorie/" + props.match.params.id)
-    .then((response) => {
-      setUsername(response.data.username);
-      setDescription(response.data.description);
-      setCalories(response.data.calories);
-      setDate(new Date(response.data.date));
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-
+    // Fetch all users for the dropdown
     axios.get("http://localhost:5000/users/")
     .then((response) => {
       if (response.data.length > 0) {
         setUsers(response.data.map(user => user.username));
-        setUsername(response.data[0].username);
       }
     })
     .catch((error) => {
       console.log(error);
     });
-  },[props.match.params.id]);
+}, [id]);
 
-function handleUsername(e) {
-  setUsername(e.target.value);
-}
+  function handleUsername(e) {
+    setUsername(e.target.value);
+  }
 
-function handleDescription(e) {
-  setDescription(e.target.value);
-}
+  function handleDescription(e) {
+    setDescription(e.target.value);
+  }
 
-function handleCalories(e) {
-  setCalories(e.target.value);
-}
+  function handleCalories(e) {
+    setCalories(e.target.value);
+  }
 
-function handleDate(date) {
- setDate(date);
-}
+  function handleDate(date) {
+    setDate(date);
+  }
 
-function handleSubmit(e) {
-  e.preventDefault();
+  function handleSubmit(e) {
+    e.preventDefault();
 
-  const food = {
-    username,
-    description,
-    calories,
-    date
-  };
+    const food = {
+      username,
+      description,
+      calories,
+      date,
+    };
 
-  console.log(food);
+    console.log(food);
 
-  axios
-    .post("http://localhost:5000/calorie/update", food)
-    .then((res) => console.log(res.data));
+    axios
+      .post("http://localhost:5000/calorie/update", food)
+      .then((res) => console.log(res.data));
 
-  window.location = "/";
-}
+    window.location = "/";
+  }
   return (
-   <>
-    <div className="container">
+    <>
+      <div className="container">
         <div className="card border-0 shadow my-4">
           <div className="card-body p-3"></div>
           <div>
-            <h3 style={{ textAlign: "center"}}><img src="https://user-images.githubusercontent.com/37651620/142764215-78f5b75f-4871-451e-9a4d-dd77cc667fc5.png" alt="Food" style={{height: "150px" }} /> </h3>
+            <h3 style={{ textAlign: "center" }}>
+              <img
+                src="https://user-images.githubusercontent.com/37651620/142764215-78f5b75f-4871-451e-9a4d-dd77cc667fc5.png"
+                alt="Food"
+                style={{ height: "150px" }}
+              />{" "}
+            </h3>
             <form onSubmit={handleSubmit}>
               <div
                 className="form-group"
                 style={{
                   marginLeft: "20px",
                   marginBottom: "15px",
-                  marginRight: "20px"
+                  marginRight: "20px",
                 }}
               >
                 <label>👤 User name: </label>
@@ -111,7 +117,7 @@ function handleSubmit(e) {
                 style={{
                   marginLeft: "20px",
                   marginBottom: "25px",
-                  marginRight: "20px"
+                  marginRight: "20px",
                 }}
               >
                 <label>🥡 Food Info: </label>
@@ -128,7 +134,7 @@ function handleSubmit(e) {
                 style={{
                   marginLeft: "20px",
                   marginBottom: "15px",
-                  marginRight: "20px"
+                  marginRight: "20px",
                 }}
               >
                 <label>🔥 Calories: </label>
@@ -144,17 +150,14 @@ function handleSubmit(e) {
                 style={{
                   marginLeft: "20px",
                   marginBottom: "15px",
-                  marginRight: "20px"
+                  marginRight: "20px",
                 }}
               >
-              <div style={{ textAlign: "center", cursor:"pointer" }}>
-                <label>Date: </label>
-                <div>
-                  <DatePicker
-                    selected={date}
-                    onChange={handleDate}
-                  />
-                </div>
+                <div style={{ textAlign: "center", cursor: "pointer" }}>
+                  <label>Date: </label>
+                  <div>
+                    <DatePicker selected={date} onChange={handleDate} />
+                  </div>
                 </div>
               </div>
 
@@ -174,8 +177,8 @@ function handleSubmit(e) {
           </div>
         </div>
       </div>
-   </>
-  )
-}
+    </>
+  );
+};
 
-export default EditFood
+export default EditFood;
